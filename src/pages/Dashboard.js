@@ -1,0 +1,152 @@
+import React, { useCallback, useEffect, useState } from "react";
+import Filters from "../components/Filters";
+import AttendanceTable from "../components/AttendanceTable";
+import AttendanceChart from "../components/AttendanceChart";
+import AttendanceCalendar from "../components/AttendanceCalendar";
+import { fetchAttendance } from "../services/api";
+import AttendanceControls from "../components/AttendanceControls";
+import UserSubjectForm from "../components/UserSubjectForm";
+import SubjectAttendanceSummary from "../components/SubjectAttendanceSummary";
+import Card from "../components/ui/Card";
+import StatCard from "../components/ui/StatCard";
+
+export default function Dashboard() {
+  const [data, setData] = useState([]);
+  const [start, setStart] = useState("2026-01-01");
+  const [end, setEnd] = useState("2026-12-31");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetchAttendance(start, end);
+      setData(res.data.content || []);
+    } catch (e) {
+      setError(e?.message || "Failed to load attendance.");
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [start, end]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+            Attendance Dashboard
+          </h1>
+          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+            Manage users/subjects, mark attendance, and analyze trends.
+          </p>
+        </div>
+        <div className="text-xs text-slate-500 dark:text-slate-400">
+          Range: <span className="font-medium">{start}</span> →{" "}
+          <span className="font-medium">{end}</span>
+        </div>
+      </div>
+
+      {error && (
+        <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-100">
+          {error}
+        </div>
+      )}
+
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Records"
+          value={loading ? "…" : data.length}
+          hint="In current date range"
+          tone="neutral"
+        />
+        <StatCard
+          label="Present"
+          value={
+            loading
+              ? "…"
+              : `${data.length ? Math.round((data.filter((d) => d.present).length / data.length) * 100) : 0}%`
+          }
+          hint={loading ? "" : `${data.filter((d) => d.present).length} present`}
+          tone="success"
+        />
+        <StatCard
+          label="Absent"
+          value={loading ? "…" : data.filter((d) => !d.present).length}
+          hint="Marked absent"
+          tone="danger"
+        />
+        <StatCard
+          label="Coverage"
+          value={
+            loading
+              ? "…"
+              : `${new Set(data.map((d) => d.userId).filter(Boolean)).size} users • ${
+                  new Set(data.map((d) => d.subjectId).filter(Boolean)).size
+                } subjects`
+          }
+          hint="Unique in range"
+          tone="info"
+        />
+      </div>
+
+      <div className="grid gap-5">
+        <Card
+          title="Add users & subjects"
+          description="Create test users and subjects for attendance tracking."
+        >
+          <UserSubjectForm refresh={loadData} />
+        </Card>
+
+        <Card
+          title="Mark attendance"
+          description="Select a user and subject, then mark present/absent."
+        >
+          <AttendanceControls refresh={loadData} data={data} />
+        </Card>
+
+        <Card
+          title="Filter"
+          description="Limit records by date range to focus the dashboard."
+        >
+          <Filters
+            start={start}
+            end={end}
+            setStart={setStart}
+            setEnd={setEnd}
+            onFilter={loadData}
+          />
+        </Card>
+
+        <Card
+          title="Attendance log"
+          description="Recent records in a clean, sortable-looking table."
+        >
+          <AttendanceTable data={data} loading={loading} />
+        </Card>
+
+        <Card
+          title="Subject-wise attendance"
+          description="Total classes attended out of classes held, per subject."
+        >
+          <SubjectAttendanceSummary data={data} loading={loading} />
+        </Card>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          <Card title="Monthly attendance" description="Percentage present by month.">
+            <AttendanceChart data={data} />
+          </Card>
+          <Card title="Calendar view" description="Quick glance presence heatmap.">
+            <AttendanceCalendar data={data} />
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
