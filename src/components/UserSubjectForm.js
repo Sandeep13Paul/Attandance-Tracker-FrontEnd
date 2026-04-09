@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createSubject, createUser } from "../services/api";
 import Button from "./ui/Button";
 import { Input } from "./ui/Field";
 
@@ -7,29 +8,23 @@ export default function UserSubjectForm({ refresh }) {
   const [subjectName, setSubjectName] = useState("");
 
   const addUser = async () => {
-    await fetch("http://localhost:8080/api/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: userName, email: userName + "@test.com" }),
-    });
-
-    setUserName("");
-    refresh();
+    try {
+      await createUser(userName.trim(), `${userName.trim()}@test.com`);
+      setUserName("");
+      refresh();
+    } catch (e) {
+      window.alert(e?.message || "Could not add user");
+    }
   };
 
   const addSubject = async () => {
-    await fetch("http://localhost:8080/api/subjects", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: subjectName }),
-    });
-
-    setSubjectName("");
-    refresh();
+    try {
+      await createSubject(subjectName.trim());
+      setSubjectName("");
+      refresh();
+    } catch (e) {
+      window.alert(e?.message || "Could not add subject");
+    }
   };
 
   return (

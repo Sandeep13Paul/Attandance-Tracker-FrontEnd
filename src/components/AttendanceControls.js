@@ -3,39 +3,75 @@ import { fetchUsers, fetchSubjects, markAttendance, markAll } from "../services/
 import Button from "./ui/Button";
 import { Select } from "./ui/Field";
 
-export default function AttendanceControls({ refresh, data = [] }) {
+export default function AttendanceControls({
+  refresh,
+  data = [],
+  isAdmin = false,
+  currentUserId = "",
+}) {
   const [users, setUsers] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [userId, setUserId] = useState("");
   const [subjectId, setSubjectId] = useState("");
 
-  const alreadyMarked = data.some(
-    (a) =>
-      a.userId === userId &&
-      a.subjectName &&
-      a.date === new Date().toISOString().split("T")[0]
+  useEffect(() => {
+    if (!isAdmin && currentUserId) {
+      setUserId(String(currentUserId));
+    }
+  }, [isAdmin, currentUserId]);
+
+  const today = new Date().toISOString().split("T")[0];
+  const selectedSubject = subjects.find(
+    (s) => String(s.id) === String(subjectId)
   );
+  const alreadyMarked = data.some((a) => {
+    if (String(a.userId) !== String(userId) || a.date !== today) return false;
+    if (subjectId && a.subjectId != null)
+      return String(a.subjectId) === String(subjectId);
+    if (selectedSubject?.name && a.subjectName)
+      return a.subjectName === selectedSubject.name;
+    return false;
+  });
 
   useEffect(() => {
-    fetchUsers().then(setUsers);
-    fetchSubjects().then(setSubjects);
-  }, []);
+    if (isAdmin) {
+      fetchUsers()
+        .then(setUsers)
+        .catch(() => setUsers([]));
+    } else {
+      setUsers([]);
+    }
+    fetchSubjects()
+      .then(setSubjects)
+      .catch(() => setSubjects([]));
+  }, [isAdmin]);
 
   return (
     <div className="grid gap-4 md:grid-cols-12 md:items-end">
-      <label className="grid gap-1 md:col-span-4">
-        <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-          User
-        </span>
-        <Select value={userId} onChange={(e) => setUserId(e.target.value)}>
-          <option value="">Select user</option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name}
-            </option>
-          ))}
-        </Select>
-      </label>
+      {isAdmin ? (
+        <label className="grid gap-1 md:col-span-4">
+          <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            User
+          </span>
+          <Select value={userId} onChange={(e) => setUserId(e.target.value)}>
+            <option value="">Select user</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.name}
+              </option>
+            ))}
+          </Select>
+        </label>
+      ) : (
+        <div className="md:col-span-4">
+          <div className="text-xs font-medium text-slate-600 dark:text-slate-400">
+            User
+          </div>
+          <div className="mt-1 h-10 rounded-xl border border-slate-200 bg-white/70 px-3 text-sm leading-10 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+            You
+          </div>
+        </div>
+      )}
 
       <label className="grid gap-1 md:col-span-4">
         <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -56,8 +92,12 @@ export default function AttendanceControls({ refresh, data = [] }) {
           variant="success"
           disabled={!userId || !subjectId || alreadyMarked}
           onClick={async () => {
-            await markAttendance(userId, subjectId, true);
-            refresh();
+            try {
+              await markAttendance(userId, subjectId, true);
+              refresh();
+            } catch (e) {
+              window.alert(e?.message || "Could not mark present");
+            }
           }}
         >
           Present
@@ -66,22 +106,32 @@ export default function AttendanceControls({ refresh, data = [] }) {
           variant="danger"
           disabled={!userId || !subjectId || alreadyMarked}
           onClick={async () => {
-            await markAttendance(userId, subjectId, false);
-            refresh();
+            try {
+              await markAttendance(userId, subjectId, false);
+              refresh();
+            } catch (e) {
+              window.alert(e?.message || "Could not mark absent");
+            }
           }}
         >
           Absent
         </Button>
-        <Button
-          variant="secondary"
-          disabled={!userId}
-          onClick={async () => {
-            await markAll(userId, true);
-            refresh();
-          }}
-        >
-          Mark all present
-        </Button>
+        {isAdmin && (
+          <Button
+            variant="secondary"
+            disabled={!userId}
+            onClick={async () => {
+              try {
+                await markAll(userId, true);
+                refresh();
+              } catch (e) {
+                window.alert(e?.message || "Could not mark all present");
+              }
+            }}
+          >
+            Mark all present
+          </Button>
+        )}
       </div>
     </div>
   );

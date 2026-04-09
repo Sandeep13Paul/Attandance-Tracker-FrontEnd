@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Filters from "../components/Filters";
 import AttendanceTable from "../components/AttendanceTable";
 import AttendanceChart from "../components/AttendanceChart";
@@ -10,12 +10,17 @@ import SubjectAttendanceSummary from "../components/SubjectAttendanceSummary";
 import Card from "../components/ui/Card";
 import StatCard from "../components/ui/StatCard";
 
-export default function Dashboard() {
+export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
   const [start, setStart] = useState("2026-01-01");
   const [end, setEnd] = useState("2026-12-31");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const isAdmin = Boolean(authInfo?.isAdmin);
+  // Backend already filters results based on authHeader/role.
+  // For students, we show what the API returns.
+  const visibleData = useMemo(() => data, [data]);
 
   const loadData = useCallback(async () => {
     try {
@@ -62,7 +67,7 @@ export default function Dashboard() {
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Records"
-          value={loading ? "…" : data.length}
+          value={loading ? "…" : visibleData.length}
           hint="In current date range"
           tone="neutral"
         />
@@ -71,14 +76,14 @@ export default function Dashboard() {
           value={
             loading
               ? "…"
-              : `${data.length ? Math.round((data.filter((d) => d.present).length / data.length) * 100) : 0}%`
+              : `${visibleData.length ? Math.round((visibleData.filter((d) => d.present).length / visibleData.length) * 100) : 0}%`
           }
-          hint={loading ? "" : `${data.filter((d) => d.present).length} present`}
+          hint={loading ? "" : `${visibleData.filter((d) => d.present).length} present`}
           tone="success"
         />
         <StatCard
           label="Absent"
-          value={loading ? "…" : data.filter((d) => !d.present).length}
+          value={loading ? "…" : visibleData.filter((d) => !d.present).length}
           hint="Marked absent"
           tone="danger"
         />
@@ -87,8 +92,8 @@ export default function Dashboard() {
           value={
             loading
               ? "…"
-              : `${new Set(data.map((d) => d.userId).filter(Boolean)).size} users • ${
-                  new Set(data.map((d) => d.subjectId).filter(Boolean)).size
+              : `${new Set(visibleData.map((d) => d.userId).filter(Boolean)).size} users • ${
+                  new Set(visibleData.map((d) => d.subjectId).filter(Boolean)).size
                 } subjects`
           }
           hint="Unique in range"
@@ -97,18 +102,29 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-5">
-        <Card
-          title="Add users & subjects"
-          description="Create test users and subjects for attendance tracking."
-        >
-          <UserSubjectForm refresh={loadData} />
-        </Card>
+        {isAdmin && (
+          <Card
+            title="Add users & subjects"
+            description="Admin-only: create users and subjects for attendance tracking."
+          >
+            <UserSubjectForm refresh={loadData} />
+          </Card>
+        )}
 
         <Card
           title="Mark attendance"
-          description="Select a user and subject, then mark present/absent."
+          description={
+            isAdmin
+              ? "Admin: select a user and subject, then mark present/absent."
+              : "Select a subject, then mark your attendance."
+          }
         >
-          <AttendanceControls refresh={loadData} data={data} />
+          <AttendanceControls
+            refresh={loadData}
+            data={visibleData}
+            isAdmin={isAdmin}
+            currentUserId={authInfo?.userId || ""}
+          />
         </Card>
 
         <Card
@@ -128,22 +144,22 @@ export default function Dashboard() {
           title="Attendance log"
           description="Recent records in a clean, sortable-looking table."
         >
-          <AttendanceTable data={data} loading={loading} />
+          <AttendanceTable data={visibleData} loading={loading} />
         </Card>
 
         <Card
           title="Subject-wise attendance"
           description="Total classes attended out of classes held, per subject."
         >
-          <SubjectAttendanceSummary data={data} loading={loading} />
+          <SubjectAttendanceSummary data={visibleData} loading={loading} />
         </Card>
 
         <div className="grid gap-5 lg:grid-cols-2">
           <Card title="Monthly attendance" description="Percentage present by month.">
-            <AttendanceChart data={data} />
+            <AttendanceChart data={visibleData} />
           </Card>
           <Card title="Calendar view" description="Quick glance presence heatmap.">
-            <AttendanceCalendar data={data} />
+            <AttendanceCalendar data={visibleData} />
           </Card>
         </div>
       </div>
