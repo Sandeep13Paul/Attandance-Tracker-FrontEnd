@@ -1,5 +1,5 @@
 const BASE_URL =
-  (process.env.REACT_APP_API_URL || "http://localhost:8080/api").replace(
+  (process.env.REACT_APP_API_URL || "https://attandance-tracker-backend.onrender.com/api").replace(
     /\/$/,
     ""
   );
