@@ -12,6 +12,7 @@ import StatCard from "../components/ui/StatCard";
 import SubjectChart from "../components/SubjectChart";
 import { fetchSubjectStats } from "../services/api";
 import { fetchUsers } from "../services/api";
+import { useCallback } from "react";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
@@ -46,16 +47,16 @@ export default function Dashboard({ authInfo }) {
     loadData();
   }, [loadData]);
 
-  const loadSubjectStats = async () => {
+  const loadSubjectStats = useCallback(async () => {
     const res = await fetchSubjectStats(
       isAdmin ? selectedUserId : null
     );
     setSubjectStats(res.data || []);
-  };
+  }, [selectedUserId, isAdmin]);
 
   useEffect(() => {
     loadSubjectStats();
-  }, [selectedUserId]);
+  }, [loadSubjectStats]);
 
   useEffect(() => {
     if (isAdmin) {
