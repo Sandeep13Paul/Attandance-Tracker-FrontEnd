@@ -12,7 +12,6 @@ import StatCard from "../components/ui/StatCard";
 import SubjectChart from "../components/SubjectChart";
 import { fetchSubjectStats } from "../services/api";
 import { fetchUsers } from "../services/api";
-import { useCallback } from "react";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
