@@ -9,6 +9,9 @@ import UserSubjectForm from "../components/UserSubjectForm";
 import SubjectAttendanceSummary from "../components/SubjectAttendanceSummary";
 import Card from "../components/ui/Card";
 import StatCard from "../components/ui/StatCard";
+import SubjectChart from "../components/SubjectChart";
+import { fetchSubjectStats } from "../services/api";
+import { fetchUsers } from "../services/api";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
@@ -16,6 +19,9 @@ export default function Dashboard({ authInfo }) {
   const [end, setEnd] = useState("2026-12-31");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [subjectStats, setSubjectStats] = useState([]);
+  const [selectedUserId, setSelectedUserId] = useState("");
+  const [users, setUsers] = useState([]);
 
   const isAdmin = Boolean(authInfo?.isAdmin);
   // Backend already filters results based on authHeader/role.
@@ -40,6 +46,28 @@ export default function Dashboard({ authInfo }) {
     loadData();
   }, [loadData]);
 
+  const loadSubjectStats = async () => {
+    const res = await fetchSubjectStats(
+      isAdmin ? selectedUserId : null
+    );
+    setSubjectStats(res.data || []);
+  };
+
+  useEffect(() => {
+    loadSubjectStats();
+  }, [selectedUserId]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers().then((res) => setUsers(res || []));
+    }
+  }, [isAdmin]);
+
+  useEffect(() => {
+    if (isAdmin && users.length > 0 && !selectedUserId) {
+      setSelectedUserId(users[0].id);
+    }
+  }, [users, isAdmin, selectedUserId]);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -154,10 +182,33 @@ export default function Dashboard({ authInfo }) {
           <SubjectAttendanceSummary data={visibleData} loading={loading} />
         </Card>
 
-        <div className="grid gap-5 lg:grid-cols-2">
+        <div className="grid gap-5">
+          <Card title="Subject-wise attendance" description="Total classes attended out of classes held, per subject.">
+            {isAdmin && (
+              <div className="mb-3">
+                <select
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  className="rounded-lg border px-3 py-2"
+                >
+                  <option value="">Select User</option>
+                  {users.map((u) => (
+                    <option key={u.id} value={u.id}>
+                      {u.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <SubjectChart data={subjectStats} />
+          </Card>
+        </div>
+
+        <div className="grid gap-20 lg:grid-cols-2">
           <Card title="Monthly attendance" description="Percentage present by month.">
             <AttendanceChart data={visibleData} />
           </Card>
+
           <Card title="Calendar view" description="Quick glance presence heatmap.">
             <AttendanceCalendar data={visibleData} />
           </Card>

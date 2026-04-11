@@ -13,6 +13,7 @@ export default function AttendanceControls({
   const [subjects, setSubjects] = useState([]);
   const [userId, setUserId] = useState("");
   const [subjectId, setSubjectId] = useState("");
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     if (!isAdmin && currentUserId) {
@@ -90,10 +91,14 @@ export default function AttendanceControls({
       <div className="flex flex-wrap gap-2 md:col-span-4 md:justify-end">
         <Button
           variant="success"
-          disabled={!userId || !subjectId || alreadyMarked}
+          disabled={
+            !subjectId ||
+            alreadyMarked ||
+            (role === "ADMIN" && !userId)
+          }
           onClick={async () => {
             try {
-              await markAttendance(userId, subjectId, true);
+              await markAttendance(role === "ADMIN" ? userId : null, subjectId, true);
               refresh();
             } catch (e) {
               window.alert(e?.message || "Could not mark present");
@@ -104,10 +109,14 @@ export default function AttendanceControls({
         </Button>
         <Button
           variant="danger"
-          disabled={!userId || !subjectId || alreadyMarked}
+          disabled={
+            !subjectId ||
+            alreadyMarked ||
+            (role === "ADMIN" && !userId)
+          }
           onClick={async () => {
             try {
-              await markAttendance(userId, subjectId, false);
+              await markAttendance(role === "ADMIN" ? userId : null, subjectId, false);
               refresh();
             } catch (e) {
               window.alert(e?.message || "Could not mark absent");

@@ -33,7 +33,7 @@ export default function AttendanceCalendar({ data }) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 space-x-24">
       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600 dark:text-slate-400">
         <div className="font-medium text-slate-700 dark:text-slate-300">Legend</div>
         <div className="inline-flex items-center gap-2">

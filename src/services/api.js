@@ -3,6 +3,11 @@ const BASE_URL =
     /\/$/,
     ""
   );
+// const BASE_URL =
+//   (process.env.REACT_APP_API_URL || "http://localhost:8080/api").replace(
+//     /\/$/,
+//     ""
+//   );
 
 const getToken = () => localStorage.getItem("token");
 
@@ -169,4 +174,18 @@ export const register = async ({ email, password, name, role }) => {
     throw new Error(body.message || "Registration failed");
   }
   return body;
+};
+
+export const fetchSubjectStats = async (userId) => {
+  let url = `${BASE_URL}/attendance/subject-stats`;
+
+  if (userId) {
+    url += `?userId=${userId}`;
+  }
+
+  const res = await fetch(url, {
+    headers: authHeaders(),
+  });
+
+  return res.json();
 };
