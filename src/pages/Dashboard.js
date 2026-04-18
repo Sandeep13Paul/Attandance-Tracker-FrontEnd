@@ -19,8 +19,8 @@ import { WeeklyTrend } from "../components/WeeklyTrendChart";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
-  // const [start, setStart] = useState("2026-01-01");
-  // const [end, setEnd] = useState("2026-12-31");
+  const [start] = useState("2026-01-01");
+  const [end] = useState("2026-12-31");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [subjectStats, setSubjectStats] = useState([]);
