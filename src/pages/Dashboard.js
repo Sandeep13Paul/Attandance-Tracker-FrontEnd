@@ -268,11 +268,7 @@ export default function Dashboard({ authInfo }) {
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="
-                      h-12 px-4 rounded-xl border
-                      bg-white text-black border-gray-300
-                      dark:bg-slate-900 dark:text-white dark:border-slate-700
-                  "
+                  className="h-12 px-4 rounded-xl border bg-white text-black border-gray-300 dark:bg-slate-900 dark:text-white dark:border-slate-700"
                 >
                   <option value="">Select User</option>
                   {users.map((u) => (
