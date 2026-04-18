@@ -255,20 +255,24 @@ export default function Dashboard({ authInfo }) {
 
         <Card
           className="mt-4"
-          title="Subject-wise attendance"
+          title="Subject-wise Attendance Log"
           description="Total classes attended out of classes held, per subject."
         >
           <SubjectAttendanceSummary data={visibleData} loading={loading} />
         </Card>
 
         <div className="grid gap-5 mt-4">
-          <Card title="Subject-wise attendance" description="Total classes attended out of classes held, per subject.">
+          <Card title="Subject-wise Attendance Graph" description="Total classes attended out of classes held, per subject.">
             {isAdmin && (
               <div className="mb-3">
                 <select
                   value={selectedUserId}
                   onChange={(e) => setSelectedUserId(e.target.value)}
-                  className="rounded-lg border px-3 py-2"
+                  className="
+                      h-12 px-4 rounded-xl border
+                      bg-white text-black border-gray-300
+                      dark:bg-slate-900 dark:text-white dark:border-slate-700
+                  "
                 >
                   <option value="">Select User</option>
                   {users.map((u) => (
