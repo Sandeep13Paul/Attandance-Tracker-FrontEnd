@@ -80,11 +80,14 @@ export const fetchSubjects = async () => {
 };
 
 // ✅ Mark attendance
-export const markAttendance = async (userId, subjectId, present) => {
+export const markAttendance = async (userId, subjectId, present, date) => {
   const q = new URLSearchParams();
   if (userId != null && String(userId).length > 0) q.set("userId", String(userId));
   q.set("subjectId", String(subjectId));
   q.set("present", String(present));
+
+  if (date) q.set("date", date); // 🔥 NEW
+
   const res = await safeFetch(
     `${BASE_URL}/attendance/mark?${q.toString()}`,
     {
