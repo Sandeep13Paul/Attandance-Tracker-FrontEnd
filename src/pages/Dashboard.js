@@ -22,6 +22,9 @@ export default function Dashboard({ authInfo }) {
   const [subjectStats, setSubjectStats] = useState([]);
   const [selectedUserId, setSelectedUserId] = useState("");
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(0);
+  const [size] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
 
   const isAdmin = Boolean(authInfo?.isAdmin);
   // Backend already filters results based on authHeader/role.
@@ -32,14 +35,19 @@ export default function Dashboard({ authInfo }) {
     try {
       setLoading(true);
       setError("");
-      const res = await fetchAttendance(start, end);
+      const res = await fetchAttendance(start, end, page, size);
       setData(res.data.content || []);
+      setTotalPages(res.data.totalPages || 0);
     } catch (e) {
       setError(e?.message || "Failed to load attendance.");
       setData([]);
     } finally {
       setLoading(false);
     }
+  }, [start, end, page, size]);
+
+  useEffect(() => {
+    setPage(0);
   }, [start, end]);
 
   useEffect(() => {
@@ -173,6 +181,11 @@ export default function Dashboard({ authInfo }) {
           description="Recent records in a clean, sortable-looking table."
         >
           <AttendanceTable data={visibleData} loading={loading} />
+          <div className="flex justify-between items-center mt-4">
+            <button disabled={page === 0} onClick={() => setPage((p) => p - 1)} className="px-3 py-1 border rounded disabled:opacity-50">Prev</button>
+            <span className="text-sm">Page {page + 1} of {totalPages}</span>
+            <button disabled={page >= totalPages - 1} onClick={() => setPage((p) => p + 1)} className="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+          </div>
         </Card>
 
         <Card

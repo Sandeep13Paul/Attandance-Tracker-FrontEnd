@@ -43,10 +43,10 @@ async function readErrorMessage(res) {
 }
 
 // ✅ Fetch attendance
-export const fetchAttendance = async (start, end) => {
+export const fetchAttendance = async (start, end, page = 0, size = 10) => {
   try {
     const res = await safeFetch(
-      `${BASE_URL}/attendance?start=${start}&end=${end}`,
+      `${BASE_URL}/attendance?start=${start}&end=${end}&page=${page}&size=${size}`,
       {
         headers: { ...authHeaders() },
       }
