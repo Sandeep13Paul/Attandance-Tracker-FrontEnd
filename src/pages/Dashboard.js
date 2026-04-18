@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import Filters from "../components/Filters";
+// import { Filler } from "../components/Filters";
 import AttendanceTable from "../components/AttendanceTable";
 import AttendanceChart from "../components/AttendanceChart";
 import AttendanceCalendar from "../components/AttendanceCalendar";
@@ -19,8 +19,8 @@ import { WeeklyTrend } from "../components/WeeklyTrendChart";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
-  const [start, setStart] = useState("2026-01-01");
-  const [end, setEnd] = useState("2026-12-31");
+  // const [start, setStart] = useState("2026-01-01");
+  // const [end, setEnd] = useState("2026-12-31");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [subjectStats, setSubjectStats] = useState([]);
