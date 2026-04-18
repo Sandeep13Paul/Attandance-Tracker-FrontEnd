@@ -104,7 +104,11 @@ export default function AttendanceControls({
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="h-10 rounded-xl border px-3 text-sm"
+          className="
+          h-12 px-4 rounded-xl border
+          bg-white text-black border-gray-300
+          dark:bg-slate-900 dark:text-white dark:border-slate-700
+          "
         />
       </label>
 

@@ -12,6 +12,10 @@ import StatCard from "../components/ui/StatCard";
 import SubjectChart from "../components/SubjectChart";
 import { fetchSubjectStats } from "../services/api";
 import { fetchUsers } from "../services/api";
+import { useRealtime } from "../Hooks/WebSocketHook";
+import { fetchStreak, fetchLowAttendance } from "../services/api";
+import { fetchWeeklyTrend } from "../services/api";
+import { WeeklyTrend } from "../components/WeeklyTrendChart";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
@@ -25,6 +29,10 @@ export default function Dashboard({ authInfo }) {
   const [page, setPage] = useState(0);
   const [size] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [lowSubjects, setLowSubjects] = useState([]);
+  const [weeklyTrend, setWeeklyTrend] = useState([]);
+  
 
   const isAdmin = Boolean(authInfo?.isAdmin);
   // Backend already filters results based on authHeader/role.
@@ -45,6 +53,8 @@ export default function Dashboard({ authInfo }) {
       setLoading(false);
     }
   }, [start, end, page, size]);
+
+  useRealtime(loadData);
 
   useEffect(() => {
     setPage(0);
@@ -77,6 +87,56 @@ export default function Dashboard({ authInfo }) {
     }
   }, [users, isAdmin, selectedUserId]);
 
+  const loadStreak = useCallback(async () => {
+    try {
+      const res = await fetchStreak();
+      setStreak(res.data || 0);
+    } catch (e) {
+      console.error("streak error", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadStreak();
+  }, [loadStreak]);
+
+  const loadLowSubjects = useCallback(async () => {
+    try {
+      const res = await fetchLowAttendance();
+      setLowSubjects(res.data || []);
+    } catch (e) {
+      console.error("low attendance error", e);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLowSubjects();
+  }, [loadLowSubjects]);
+
+  const loadTrend = useCallback(async () => {
+    try {
+      const res = await fetchWeeklyTrend(start, end);
+
+      console.log("TREND API:", res);
+
+      setWeeklyTrend(res.data || []); // ✅ THIS IS THE FIX
+    } catch (e) {
+      console.error("trend error", e);
+    }
+  }, [start, end]);
+
+  useEffect(() => {
+    loadTrend();
+  }, [loadTrend]);
+
+  const refreshAll = useCallback(() => {
+    loadData();
+    loadSubjectStats();
+    loadStreak();
+    loadLowSubjects();
+    loadTrend();
+  }, [loadData, loadSubjectStats, loadStreak, loadLowSubjects, loadTrend]);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -103,7 +163,7 @@ export default function Dashboard({ authInfo }) {
       <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           label="Records"
-          value={loading ? "…" : visibleData.length}
+          value={loading ? "…" : page * size + visibleData.length}
           hint="In current date range"
           tone="neutral"
         />
@@ -124,18 +184,22 @@ export default function Dashboard({ authInfo }) {
           tone="danger"
         />
         <StatCard
-          label="Coverage"
-          value={
-            loading
-              ? "…"
-              : `${new Set(visibleData.map((d) => d.userId).filter(Boolean)).size} users • ${
-                  new Set(visibleData.map((d) => d.subjectId).filter(Boolean)).size
-                } subjects`
-          }
-          hint="Unique in range"
+          label="Streak"
+          value={`${streak} days`}
           tone="info"
         />
       </div>
+
+      {lowSubjects.length > 0 && (
+        <div className="p-4 bg-red-100 text-red-700 rounded-xl mb-6">
+          ⚠️ Low Attendance:
+          {lowSubjects.map((s) => (
+            <div key={s.subject}>
+              {s.subject} - {Math.round(s.percent)}%
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="grid gap-5">
         {isAdmin && (
@@ -156,14 +220,14 @@ export default function Dashboard({ authInfo }) {
           }
         >
           <AttendanceControls
-            refresh={loadData}
+            refresh={refreshAll}   // ✅ FIX
             data={visibleData}
             isAdmin={isAdmin}
             currentUserId={authInfo?.userId || ""}
           />
         </Card>
 
-        <Card
+        {/* <Card
           title="Filter"
           description="Limit records by date range to focus the dashboard."
         >
@@ -174,11 +238,12 @@ export default function Dashboard({ authInfo }) {
             setEnd={setEnd}
             onFilter={loadData}
           />
-        </Card>
+        </Card> */}
 
         <Card
           title="Attendance log"
           description="Recent records in a clean, sortable-looking table."
+          className="mt-4"
         >
           <AttendanceTable data={visibleData} loading={loading} />
           <div className="flex justify-between items-center mt-4">
@@ -189,13 +254,14 @@ export default function Dashboard({ authInfo }) {
         </Card>
 
         <Card
+          className="mt-4"
           title="Subject-wise attendance"
           description="Total classes attended out of classes held, per subject."
         >
           <SubjectAttendanceSummary data={visibleData} loading={loading} />
         </Card>
 
-        <div className="grid gap-5">
+        <div className="grid gap-5 mt-4">
           <Card title="Subject-wise attendance" description="Total classes attended out of classes held, per subject.">
             {isAdmin && (
               <div className="mb-3">
@@ -217,13 +283,20 @@ export default function Dashboard({ authInfo }) {
           </Card>
         </div>
 
-        <div className="grid gap-20 lg:grid-cols-2">
+        <div className="grid gap-20 lg:grid-cols-2 mt-4">
           <Card title="Monthly attendance" description="Percentage present by month.">
             <AttendanceChart data={visibleData} />
           </Card>
 
           <Card title="Calendar view" description="Quick glance presence heatmap.">
             <AttendanceCalendar data={visibleData} />
+          </Card>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card className="col-span-1 lg:col-span-2 mt-4" title="Weekly Trend" description="Attendance % per week">
+            <div className="p-4 mt-2">
+              <WeeklyTrend data={weeklyTrend} />
+            </div>
           </Card>
         </div>
       </div>

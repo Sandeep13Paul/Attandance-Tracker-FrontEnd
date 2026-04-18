@@ -6,12 +6,15 @@ import { Input } from "../components/ui/Field";
 
 function saveTokenAndFinish(data, onLogin) {
   const token = data?.token ?? data?.accessToken;
+  console.log(data);
   if (!token) {
     throw new Error("Invalid response (no token).");
   }
+  const user = data.user || data;
   localStorage.setItem("token", token);
+  localStorage.setItem("userId", user.id);  // ✅ IMPORTANT
   if (data?.role) {
-    localStorage.setItem("role", String(data.role));
+    localStorage.setItem("role", String(user.role));
   }
   onLogin?.();
 }

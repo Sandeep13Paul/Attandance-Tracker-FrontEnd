@@ -48,7 +48,7 @@ export const fetchAttendance = async (start, end, page = 0, size = 10) => {
     const res = await safeFetch(
       `${BASE_URL}/attendance?start=${start}&end=${end}&page=${page}&size=${size}`,
       {
-        headers: { ...authHeaders() },
+        headers: authHeaders(),
       }
     );
 
@@ -190,5 +190,35 @@ export const fetchSubjectStats = async (userId) => {
     headers: authHeaders(),
   });
 
+  return res.json();
+};
+
+// ✅ Streak
+export const fetchStreak = async (userId = 0) => {
+  const res = await safeFetch(`${BASE_URL}/attendance/streak`, {
+    headers: authHeaders(),
+  });
+
+  if (!res.ok) throw new Error(await readErrorMessage(res));
+  return res.json();
+};
+
+// ✅ Low attendance
+export const fetchLowAttendance = async (userId = 0) => {
+  const res = await safeFetch(`${BASE_URL}/attendance/low`, {
+    headers: authHeaders(),
+  });
+
+  if (!res.ok) throw new Error(await readErrorMessage(res));
+  return res.json();
+};
+
+export const fetchWeeklyTrend = async (start, end, userId = 0) => {
+  const res = await safeFetch(
+    `${BASE_URL}/attendance/trend?start=${start}&end=${end}`,
+    { headers: authHeaders() }
+  );
+
+  if (!res.ok) throw new Error(await readErrorMessage(res));
   return res.json();
 };
