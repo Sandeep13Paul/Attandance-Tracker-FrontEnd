@@ -210,11 +210,6 @@ export default function Dashboard({ authInfo }) {
               : `Max: ${worst.subject} (${worst.needed})`
           }
           tone={totalNeeded === 0 ? "success" : "warning"}
-          className={
-            s.needed === 0
-              ? "text-green-500"
-              : "text-red-500"
-          }
         />
 
         {/* 🔥 Hover popup */}
