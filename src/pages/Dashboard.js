@@ -147,7 +147,7 @@ export default function Dashboard({ authInfo }) {
     } catch (e) {
       console.error("trend error", e);
     }
-  }, []);
+  }, [authInfo]);
 
   useEffect(() => {
     loadNeeded();
