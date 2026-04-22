@@ -208,7 +208,7 @@ export default function Dashboard({ authInfo }) {
         />
         <div className="relative group inline-block">
           <StatCard
-            label="Needed"
+            label=" Classes Needed to Fix"
             value={totalNeeded}
             hint={
               totalNeeded === 0
