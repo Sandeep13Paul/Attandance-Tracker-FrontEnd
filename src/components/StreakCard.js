@@ -12,36 +12,47 @@ export default function StreakCard({ streak }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="rounded-2xl p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg"
+      transition={{ duration: 0.4 }}
+      className="
+        h-full min-h-[105px]
+        rounded-2xl p-4
+        bg-gradient-to-r from-indigo-500 to-purple-600
+        text-white shadow-md
+        flex flex-col justify-between
+      "
     >
-      <div className="text-sm opacity-80">Current Streak</div>
+      {/* 🔹 Top Row */}
+      <div className="flex justify-between items-start">
+        {/* LEFT: Title */}
+        <div className="text-xs opacity-80">
+          CURRENT STREAK
+        </div>
 
-      {/* 🔥 Animated number */}
-      <motion.div
-        key={streak} // VERY IMPORTANT
-        initial={{ scale: 0.6, rotate: -10 }}
-        animate={{ scale: 1, rotate: 0 }}
-        transition={{ type: "spring", stiffness: 200 }}
-        className="flex items-center gap-3 mt-3"
-      >
-        <span className="text-5xl font-bold">{streak}</span>
-
-        {/* 🔥 flame animation */}
-        <motion.span
-          animate={{ scale: [1, 1.3, 1] }}
-          transition={{ repeat: Infinity, duration: 0.8 }}
-          className="text-4xl"
+        {/* RIGHT: Animated value */}
+        <motion.div
+          key={streak}
+          initial={{ scale: 0.7 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", stiffness: 180 }}
+          className="flex items-center gap-1 text-center"
         >
-          🔥
-        </motion.span>
-      </motion.div>
+          <span className="text-5xl font-bold leading-none">{streak}</span>
 
-      {/* Badge */}
-      <div className="mt-4">
-        <span className="px-3 py-1 rounded-full text-xs bg-white/20">
+          <motion.span
+            animate={{ scale: [1, 1.3, 1] }}
+            transition={{ repeat: Infinity, duration: 1 }}
+            className="text-3xl"
+          >
+            🔥
+          </motion.span>
+        </motion.div>
+      </div>
+
+      {/* 🔹 Bottom Badge */}
+      <div>
+        <span className="text-xs bg-white/20 px-2 py-1 rounded-full">
           {badge.icon} {badge.label}
         </span>
       </div>

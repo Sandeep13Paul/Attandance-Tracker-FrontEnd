@@ -200,12 +200,12 @@ export default function Dashboard({ authInfo }) {
           hint={loading ? "" : `${visibleData.filter((d) => d.present).length} present`}
           tone="success"
         />
-        <StatCard
+        {/* <StatCard
           label="Absent"
           value={loading ? "…" : visibleData.filter((d) => !d.present).length}
           hint="Marked absent"
           tone="danger"
-        />
+        /> */}
         <div className="relative group inline-block">
           <StatCard
             label=" Classes Needed to Fix"
@@ -248,9 +248,9 @@ export default function Dashboard({ authInfo }) {
             ))}
           </div>
         </div>
-      </div>
-      <div className="sm:col-span-2 lg:col-span-4 mb-5" hint="Excludes weekends & holidays" title="Streak counts only working days">
-        <StreakCard streak={streak} />
+        <div hint="Excludes weekends & holidays" title="Streak counts only working days">
+          <StreakCard streak={streak} />
+        </div>
       </div>
 
       {lowSubjects.length > 0 && (
