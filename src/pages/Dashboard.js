@@ -230,12 +230,13 @@ export default function Dashboard({ authInfo }) {
               shadow-xl
               p-3
               border
+              space-y-2
             "
           >
             {neededData.map((s) => (
               <div
                 key={s.subject}
-                className={`flex justify-between gap-5 text-sm py-1 px-2 rounded ${
+                className={`flex justify-between text-sm py-1 px-2 rounded ${
                   s.needed === 0
                     ? "text-green-500 bg-green-500/10"
                     : "text-red-500 bg-red-500/10"
