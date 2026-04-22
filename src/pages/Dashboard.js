@@ -33,6 +33,7 @@ export default function Dashboard({ authInfo }) {
   const [streak, setStreak] = useState(0);
   const [lowSubjects, setLowSubjects] = useState([]);
   const [weeklyTrend, setWeeklyTrend] = useState([]);
+  const [neededData, setNeededData] = useState([]);
   
 
   const isAdmin = Boolean(authInfo?.isAdmin);
@@ -138,14 +139,17 @@ export default function Dashboard({ authInfo }) {
     loadTrend();
   }, [loadData, loadSubjectStats, loadStreak, loadLowSubjects, loadTrend]);
 
-  const target = 75;
+  const loadNeeded = async () => {
+    const res = await fetchNeeded(authInfo?.userId);
+    setNeededData(res.data || []);
+  };
 
-  const total = visibleData.length;
-  const present = visibleData.filter(d => d.present).length;
-  
-  const currentPercent = total ? (present * 100) / total : 0;
-  
-  const gap = Math.max(0, target - currentPercent);
+  const totalNeeded = neededData.reduce((sum, s) => sum + s.needed, 0);
+
+  const worst = neededData.reduce((max, s) =>
+    s.needed > max.needed ? s : max,
+    { needed: 0 }
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -194,11 +198,38 @@ export default function Dashboard({ authInfo }) {
           tone="danger"
         />
         <StatCard
-          label="Gap to 75%"
-          value={`${gap.toFixed(1)}%`}
-          hint={gap === 0 ? "You're safe 🎉" : "Need to improve"}
-          tone={gap === 0 ? "success" : "danger"}
+          label="Needed"
+          value={totalNeeded}
+          hint={
+            totalNeeded === 0
+              ? "All subjects safe 🎉"
+              : `Max: ${worst.subject} (${worst.needed})`
+          }
+          tone={totalNeeded === 0 ? "success" : "warning"}
+          className={
+            s.needed === 0
+              ? "text-green-500"
+              : "text-red-500"
+          }
         />
+
+        {/* 🔥 Hover popup */}
+        <div className="absolute hidden group-hover:block z-50 bg-white dark:bg-slate-900 shadow-xl rounded-xl p-4 w-64 top-full mt-2">
+          {neededData.map((s) => (
+            <div key={s.subject} className={`flex justify-between text-sm py-1 px-2 rounded ${
+              s.needed === 0
+                ? "text-green-500 bg-green-500/10"
+                : "text-red-500 bg-red-500/10"
+            }`}>
+              <span>{s.subject}</span>
+              <span>
+                {s.needed === 0
+                  ? "✅ Safe"
+                  : `${s.needed} needed`}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
       <div className="sm:col-span-2 lg:col-span-4 mb-5" hint="Excludes weekends & holidays" title="Streak counts only working days">
         <StreakCard streak={streak} />

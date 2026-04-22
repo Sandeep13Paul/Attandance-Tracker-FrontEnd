@@ -222,3 +222,13 @@ export const fetchWeeklyTrend = async (start, end, userId = 0) => {
   if (!res.ok) throw new Error(await readErrorMessage(res));
   return res.json();
 };
+
+export const fetchNeeded = async (userId = 0) => {
+  const res = await safeFetch(
+    `${BASE_URL}/attendance/needed`,
+    { headers: authHeaders() }
+  );
+
+  if (!res.ok) throw new Error(await readErrorMessage(res));
+  return res.json();
+};
