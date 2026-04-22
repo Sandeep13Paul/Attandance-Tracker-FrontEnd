@@ -17,7 +17,7 @@ const BADGES = [
   { min: 0, label: "Getting Started", icon: "❄️", color: "bg-gray-400/30 text-gray-200" },
 ];
 
-const getBadge = (streak) => BADGES.find((b) => streak >= b.min);
+export const getBadge = (streak) => BADGES.find((b) => streak >= b.min);
 
 const getNextBadge = (streak) => {
   const index = BADGES.findIndex((b) => streak >= b.min);
@@ -95,6 +95,7 @@ export default function StreakCard({ streak }) {
       <div className="space-y-2">
         {/* Badge */}
         <motion.span
+          layoutId="badge"
           key={badge.label}
           initial={{ scale: 0, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}

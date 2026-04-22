@@ -16,6 +16,9 @@ import { fetchStreak, fetchLowAttendance, fetchNeeded } from "../services/api";
 import { fetchWeeklyTrend } from "../services/api";
 import { WeeklyTrend } from "../components/WeeklyTrendChart";
 import StreakCard from "../components/StreakCard";
+import BadgeIntro from "../components/BadgeIntro"
+import { LayoutGroup } from "framer-motion";
+import { getBadge } from "../components/StreakCard";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
@@ -33,6 +36,7 @@ export default function Dashboard({ authInfo }) {
   const [lowSubjects, setLowSubjects] = useState([]);
   const [weeklyTrend, setWeeklyTrend] = useState([]);
   const [neededData, setNeededData] = useState([]);
+  const [showBadgeIntro, setShowBadgeIntro] = useState(false);
   
 
   const isAdmin = Boolean(authInfo?.isAdmin);
@@ -159,6 +163,31 @@ export default function Dashboard({ authInfo }) {
     { needed: 0 }
   );
 
+  const currentBadge = getBadge(streak);
+
+  useEffect(() => {
+    if (!currentBadge) return;
+  
+    const prev = localStorage.getItem("badge");
+  
+    const order = ["Getting Started", "On Fire", "Consistent", "Legend"];
+  
+    // 👉 First load → store only
+    if (!prev) {
+      localStorage.setItem("badge", currentBadge.label);
+      return;
+    }
+  
+    // 👉 Ignore default badge
+    if (currentBadge.label === "Getting Started") return;
+  
+    // 👉 Only trigger when badge improves
+    if (order.indexOf(currentBadge.label) > order.indexOf(prev)) {
+      setShowBadgeIntro(true);
+      localStorage.setItem("badge", currentBadge.label);
+    }
+  }, [streak, currentBadge]);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -243,7 +272,17 @@ export default function Dashboard({ authInfo }) {
           </div>
         </div>
         <div hint="Excludes weekends & holidays" title="Streak counts only working days">
-          <StreakCard streak={streak} />
+          <LayoutGroup>
+            {showBadgeIntro && (
+              <BadgeIntro
+                badge={currentBadge}
+                onDone={() => setShowBadgeIntro(false)}
+              />
+            )}
+
+            {/* Your dashboard content */}
+            <StreakCard streak={streak} />
+          </LayoutGroup>
         </div>
       </div>
 
