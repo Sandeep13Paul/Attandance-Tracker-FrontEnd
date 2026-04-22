@@ -139,10 +139,15 @@ export default function Dashboard({ authInfo }) {
     loadTrend();
   }, [loadData, loadSubjectStats, loadStreak, loadLowSubjects, loadTrend]);
 
-  const loadNeeded = async () => {
-    const res = await fetchNeeded(authInfo?.userId);
-    setNeededData(res.data || []);
-  };
+  const loadNeeded = useCallback(async () => {
+    try {
+        const res = await fetchNeeded(authInfo?.userId);
+        setNeededData(res.data || []);
+
+    } catch (e) {
+      console.error("trend error", e);
+    }
+  }, []);
 
   useEffect(() => {
     loadNeeded();
