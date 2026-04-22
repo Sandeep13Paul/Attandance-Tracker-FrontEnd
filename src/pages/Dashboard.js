@@ -210,8 +210,12 @@ export default function Dashboard({ authInfo }) {
           <StatCard
             label="Needed"
             value={totalNeeded}
-            hint="Hover to view"
-            tone="warning"
+            hint={
+              totalNeeded === 0
+                ? "All subjects safe 🎉"
+                : `Max: ${worst.subject} (${worst.needed})`
+            }
+            tone={totalNeeded === 0 ? "success" : "warning"}
           />
 
           {/* ✅ Hover popup */}
