@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-// import { Filler } from "../components/Filters";
 import AttendanceTable from "../components/AttendanceTable";
 import AttendanceChart from "../components/AttendanceChart";
 import AttendanceCalendar from "../components/AttendanceCalendar";
@@ -183,7 +182,7 @@ export default function Dashboard({ authInfo }) {
         </div>
       )}
 
-      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 items-stretch">
         <StatCard
           label="Records"
           value={loading ? "…" : page * size + visibleData.length}
@@ -200,15 +199,9 @@ export default function Dashboard({ authInfo }) {
           hint={loading ? "" : `${visibleData.filter((d) => d.present).length} present`}
           tone="success"
         />
-        {/* <StatCard
-          label="Absent"
-          value={loading ? "…" : visibleData.filter((d) => !d.present).length}
-          hint="Marked absent"
-          tone="danger"
-        /> */}
-        <div className="relative group inline-block">
+        <div className="relative group h-full w-full">
           <StatCard
-            label=" Classes Needed to Fix"
+            label="Classes Needed to Fix"
             value={totalNeeded}
             hint={
               totalNeeded === 0
@@ -216,9 +209,10 @@ export default function Dashboard({ authInfo }) {
                 : `Max: ${worst.subject} (${worst.needed})`
             }
             tone={totalNeeded === 0 ? "success" : "warning"}
+            className="h-full min-h-[140px] text-lg"
           />
 
-          {/* ✅ Hover popup */}
+          {/* Hover popup */}
           <div
             className="
               absolute left-0 top-full mt-2
@@ -243,7 +237,7 @@ export default function Dashboard({ authInfo }) {
                 }`}
               >
                 <span>{s.subject}</span>
-                <span>{s.needed === 0 ? "Safe" : `${s.needed}`}</span>
+                <span>{s.needed === 0 ? "Safe" : s.needed}</span>
               </div>
             ))}
           </div>
