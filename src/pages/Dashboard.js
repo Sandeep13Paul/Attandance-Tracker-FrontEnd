@@ -206,33 +206,42 @@ export default function Dashboard({ authInfo }) {
           hint="Marked absent"
           tone="danger"
         />
-        <StatCard
-          label="Needed"
-          value={totalNeeded}
-          hint={
-            totalNeeded === 0
-              ? "All subjects safe 🎉"
-              : `Max: ${worst.subject} (${worst.needed})`
-          }
-          tone={totalNeeded === 0 ? "success" : "warning"}
-        />
+        <div className="relative group inline-block">
+          <StatCard
+            label="Needed"
+            value={totalNeeded}
+            hint="Hover to view"
+            tone="warning"
+          />
 
-        {/* 🔥 Hover popup */}
-        <div className="absolute hidden group-hover:block z-50 bg-white dark:bg-slate-900 shadow-xl rounded-xl p-4 w-64 top-full mt-2">
-          {neededData.map((s) => (
-            <div key={s.subject} className={`flex justify-between text-sm py-1 px-2 rounded ${
-              s.needed === 0
-                ? "text-green-500 bg-green-500/10"
-                : "text-red-500 bg-red-500/10"
-            }`}>
-              <span>{s.subject}</span>
-              <span>
-                {s.needed === 0
-                  ? "✅ Safe"
-                  : `${s.needed} needed`}
-              </span>
-            </div>
-          ))}
+          {/* ✅ Hover popup */}
+          <div
+            className="
+              absolute left-0 top-full mt-2
+              hidden group-hover:block
+              z-50
+              w-64
+              rounded-xl
+              bg-white dark:bg-slate-900
+              shadow-xl
+              p-3
+              border
+            "
+          >
+            {neededData.map((s) => (
+              <div
+                key={s.subject}
+                className={`flex justify-between text-sm py-1 px-2 rounded ${
+                  s.needed === 0
+                    ? "text-green-500 bg-green-500/10"
+                    : "text-red-500 bg-red-500/10"
+                }`}
+              >
+                <span>{s.subject}</span>
+                <span>{s.needed === 0 ? "Safe" : `${s.needed}`}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div className="sm:col-span-2 lg:col-span-4 mb-5" hint="Excludes weekends & holidays" title="Streak counts only working days">
