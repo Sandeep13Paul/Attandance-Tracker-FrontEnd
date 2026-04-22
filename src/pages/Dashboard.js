@@ -16,6 +16,7 @@ import { useRealtime } from "../Hooks/WebSocketHook";
 import { fetchStreak, fetchLowAttendance } from "../services/api";
 import { fetchWeeklyTrend } from "../services/api";
 import { WeeklyTrend } from "../components/WeeklyTrendChart";
+import StreakCard from "../components/StreakCard";
 
 export default function Dashboard({ authInfo }) {
   const [data, setData] = useState([]);
@@ -137,6 +138,14 @@ export default function Dashboard({ authInfo }) {
     loadTrend();
   }, [loadData, loadSubjectStats, loadStreak, loadLowSubjects, loadTrend]);
 
+  const total = visibleData.length;
+
+  const presentCount = visibleData.filter(d => d.present).length;
+
+  const average = total
+    ? Math.round((presentCount / total) * 100)
+    : 0;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -184,10 +193,14 @@ export default function Dashboard({ authInfo }) {
           tone="danger"
         />
         <StatCard
-          label="Streak"
-          value={`${streak} days`}
+          label="Average"
+          value={`${average}%`}
+          hint={`${presentCount} / ${total} classes`}
           tone="info"
         />
+      </div>
+      <div className="sm:col-span-2 lg:col-span-4 mb-5" hint="Excludes weekends & holidays" title="Streak counts only working days">
+        <StreakCard streak={streak} />
       </div>
 
       {lowSubjects.length > 0 && (
