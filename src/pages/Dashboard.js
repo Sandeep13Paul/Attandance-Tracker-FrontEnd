@@ -138,13 +138,14 @@ export default function Dashboard({ authInfo }) {
     loadTrend();
   }, [loadData, loadSubjectStats, loadStreak, loadLowSubjects, loadTrend]);
 
+  const target = 75;
+
   const total = visibleData.length;
-
-  const presentCount = visibleData.filter(d => d.present).length;
-
-  const average = total
-    ? Math.round((presentCount / total) * 100)
-    : 0;
+  const present = visibleData.filter(d => d.present).length;
+  
+  const currentPercent = total ? (present * 100) / total : 0;
+  
+  const gap = Math.max(0, target - currentPercent);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -193,10 +194,10 @@ export default function Dashboard({ authInfo }) {
           tone="danger"
         />
         <StatCard
-          label="Average"
-          value={`${average}%`}
-          hint={`${presentCount} / ${total} classes`}
-          tone="info"
+          label="Gap to 75%"
+          value={`${gap.toFixed(1)}%`}
+          hint={gap === 0 ? "You're safe 🎉" : "Need to improve"}
+          tone={gap === 0 ? "success" : "danger"}
         />
       </div>
       <div className="sm:col-span-2 lg:col-span-4 mb-5" hint="Excludes weekends & holidays" title="Streak counts only working days">
