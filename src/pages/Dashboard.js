@@ -13,7 +13,7 @@ import SubjectChart from "../components/SubjectChart";
 import { fetchSubjectStats } from "../services/api";
 import { fetchUsers } from "../services/api";
 import { useRealtime } from "../Hooks/WebSocketHook";
-import { fetchStreak, fetchLowAttendance } from "../services/api";
+import { fetchStreak, fetchLowAttendance, fetchNeeded } from "../services/api";
 import { fetchWeeklyTrend } from "../services/api";
 import { WeeklyTrend } from "../components/WeeklyTrendChart";
 import StreakCard from "../components/StreakCard";
@@ -143,6 +143,10 @@ export default function Dashboard({ authInfo }) {
     const res = await fetchNeeded(authInfo?.userId);
     setNeededData(res.data || []);
   };
+
+  useEffect(() => {
+    loadNeeded();
+  }, [loadNeeded]);
 
   const totalNeeded = neededData.reduce((sum, s) => sum + s.needed, 0);
 
