@@ -1,27 +1,45 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import confetti from "canvas-confetti";
+import BadgeModal from "../Modals/BadgeModal";
 
 /* 🔥 Badge system */
 const BADGES = [
-  { min: 100, label: "Immortal", icon: "🧬", color: "bg-purple-500/30 text-purple-200" },
-  { min: 60, label: "Unstoppable", icon: "⚡", color: "bg-yellow-400/30 text-yellow-200" },
-  { min: 30, label: "Elite", icon: "💎", color: "bg-cyan-400/30 text-cyan-200" },
-  { min: 21, label: "Master", icon: "🧠", color: "bg-pink-400/30 text-pink-200" },
-  { min: 14, label: "Champion", icon: "🏆", color: "bg-orange-400/30 text-orange-200" },
-  { min: 10, label: "Pro", icon: "🎯", color: "bg-green-400/30 text-green-200" },
-  { min: 7, label: "Consistent", icon: "🚀", color: "bg-blue-400/30 text-blue-200" },
-  { min: 5, label: "Committed", icon: "💪", color: "bg-indigo-400/30 text-indigo-200" },
-  { min: 3, label: "On Fire", icon: "🔥", color: "bg-red-400/30 text-red-200" },
-  { min: 1, label: "Started", icon: "🌱", color: "bg-emerald-400/30 text-emerald-200" },
+  // 🌱 BEGINNER
   { min: 0, label: "Getting Started", icon: "❄️", color: "bg-gray-400/30 text-gray-200" },
+  { min: 1, label: "Started", icon: "🌱", color: "bg-emerald-400/30 text-emerald-200" },
+  { min: 2, label: "Warming Up", icon: "☀️", color: "bg-yellow-300/30 text-yellow-200" },
+  { min: 3, label: "On Fire", icon: "🔥", color: "bg-red-400/30 text-red-200" },
+
+  // 💪 EARLY CONSISTENCY
+  { min: 5, label: "Committed", icon: "💪", color: "bg-indigo-400/30 text-indigo-200" },
+  { min: 7, label: "Consistent", icon: "🚀", color: "bg-blue-400/30 text-blue-200" },
+  { min: 10, label: "Focused", icon: "🎯", color: "bg-green-400/30 text-green-200" },
+
+  // 🧠 MID LEVEL
+  { min: 14, label: "Disciplined", icon: "📘", color: "bg-sky-400/30 text-sky-200" },
+  { min: 21, label: "Master", icon: "🧠", color: "bg-pink-400/30 text-pink-200" },
+  { min: 30, label: "Elite", icon: "💎", color: "bg-cyan-400/30 text-cyan-200" },
+
+  // ⚡ HIGH LEVEL
+  { min: 45, label: "Relentless", icon: "⚡", color: "bg-yellow-400/30 text-yellow-200" },
+  { min: 60, label: "Unstoppable", icon: "🔥🚀", color: "bg-orange-400/30 text-orange-200" },
+
+  // 🏆 PRO LEVEL
+  { min: 75, label: "Champion", icon: "🏆", color: "bg-amber-400/30 text-amber-200" },
+  { min: 100, label: "Immortal", icon: "🧬", color: "bg-purple-500/30 text-purple-200" },
+
+  // 👑 LEGENDARY
+  { min: 150, label: "Mythic", icon: "🌌", color: "bg-indigo-500/30 text-indigo-200" },
+  { min: 200, label: "God Mode", icon: "👑", color: "bg-fuchsia-500/30 text-fuchsia-200" },
 ];
 
-export const getBadge = (streak) => BADGES.find((b) => streak >= b.min);
+export const getBadge = (streak) => {
+  return [...BADGES].reverse().find((b) => streak >= b.min);
+};
 
 const getNextBadge = (streak) => {
-  const index = BADGES.findIndex((b) => streak >= b.min);
-  return BADGES[index - 1] || null;
+  return BADGES.find((b) => b.min > streak) || null;
 };
 
 export default function StreakCard({ streak }) {
@@ -30,6 +48,8 @@ export default function StreakCard({ streak }) {
 
   const prevBadge = useRef();
   const audioRef = useRef(null);
+
+  const [showBadges, setShowBadges] = useState(false);
 
   /* 🔊 Initialize audio */
   useEffect(() => {
@@ -100,7 +120,8 @@ export default function StreakCard({ streak }) {
           initial={{ scale: 0, rotate: -20 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: "spring", stiffness: 200 }}
-          className={`inline-block text-xs px-2 py-1 rounded-full ${badge.color}`}
+          onClick={() => setShowBadges(true)}
+          className={`cursor-pointer inline-block text-xs px-2 py-1 rounded-full ${badge.color}`}
         >
           {badge.icon} {badge.label}
         </motion.span>
@@ -144,6 +165,12 @@ export default function StreakCard({ streak }) {
           </motion.span>
         </motion.div>
       </div>
+      <BadgeModal
+        open={showBadges}
+        onClose={() => setShowBadges(false)}
+        streak={streak}
+        badges={BADGES}
+      />
     </motion.div>
   );
 }
